@@ -269,4 +269,263 @@ new Vue()
 
 ![vue_lifecycle](./img/05_lifecycle.png);
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script src="http://unpkg.com/vue"></script>
+  </head>
+  <body>
+    <div id="lifeCycle">
+      <div v-on:click="showName">클릭</div>
+      <div v-on:click="removeVue">Vue객체 삭제</div>
+    </div>
+    <script>
+      var app = new Vue({
+        el: "#lifeCycle",
+        data: { title: "제목" },
+        methods: {
+          // 호출시 마다 매번 수행
+          // vue 객체 삭제
+          removeVue: function() {
+            app.$destroy();
+          },
+          showName: function() {
+            console.log("showName..........");
+            return (this.$data.title = "제목");
+          }
+        },
+        computed: {
+          // cache에 들어가는 정적 데이타 초기화 관리
+          compu: function() {
+            // watched 이용해 변경된 내용 반영 가능
+            console.log("showName.........."); // 라이프 사이클과 관련
+            return (this.$data.title = "제목");
+          }
+        },
+        // Vue 객체가 생성되기 전에 호출되는 hook
+        beforeCreate: function() {
+          console.log("beforeCreate " + this.title);
+        },
+        // Vue 객체가 생성된 후에 호출되는 hook
+        created: function() {
+          console.log("created " + this.title);
+        },
+        // DOM 트리가 구성이 되고 렌더링되기 전에 호출
+        beforeMount: function() {
+          console.log("beforeMount " + this.title);
+        },
+        // DOM 트리가 구성이 되고 렌더링된 후에 호출
+        mounted: function() {
+          console.log("mounted " + this.title);
+        },
+        // Vue 모델(data)가 변경되기 전에 호출
+        beforeUpdate: function() {
+          console.log("beforeUpdate " + this.title);
+        },
+        // Vue 모델(data)가 변경된 후에 호출
+        updated: function() {
+          console.log("updated " + this.title);
+        },
+        // Vue 객체가 삭제되기 전에 호출
+        beforeDestroy: function() {
+          console.log("beforeDestroy ");
+        },
+        // Vue 객체가 삭제된 후에 호출
+        destroyed: function() {
+          console.log("destroyed ");
+        }
+      });
+    </script>
+  </body>
+</html>
+```
+
 ## **Vue Directive**
+
+### 1. 바인딩 방식
+
+### v-bind
+
+```html
+<tag v-bind : 속성명=속성값(Vue의 Data가 Binding)>
+<input name="name" value=" " />
+<input name="name" v-bind:value=" " />
+```
+
+- 단방향  
+  모델에 있는 값을 바인딩하는 것 밖에 못함  
+  input양식으로 고쳐서 한다고 뷰의 모델 값 수정 불가  
+  변경된 내용이 뷰에 전달 되지 않는다는 것
+
+### v-model
+
+```html
+<input name="name" v-model="message" />
+```
+
+- 양방향
+  변경된 내용이 Vue 모델 값에도 적용되도록하려면 v-model 사용
+
+### 2. 조건부 렌더링
+
+### v-if / v-else
+
+```html
+<div id="app">
+  <div v-text="title"></div>
+  <!-- 조건이 false면 body 내용이 주석 처리. -->
+  <div v-if="hasResult"><h2>if {{title}}</h2></div>
+  <div v-else><h2>else {{id}}</h2></div>
+  <!-- 조건 = false => body 내용이 display: none-->
+  <div v-show="hasResult"><h2>show {{title}}</h2></div>
+</div>
+
+<script type="text/javascript">
+  var model = { title: "Title", id:'Vue };
+  var first = new Vue({
+    el: "#app",
+    data: model,
+    computed: {
+      hasResult: function() {
+        return this.title.length > 10;
+      }
+    }
+  });
+</script>
+```
+
+| `v-if`                                                               | `v-show`                                                    |
+| -------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 조건부 블록 안의 이벤트 리스너와 자식 컴포넌트 토글 동안 적절히 제거 | CSS 기반 토글만으로 초기 조건 관계없이 엘리먼트 항상 렌더링 |
+| 토글비용이 높음                                                      | 초기 렌더링비용이 높음                                      |
+| 런타임 시 조건 변경 없으면 v-if                                      | 자주 바뀐다면 v-show                                        |
+
+### template
+
+- v-if는 디렉티브이므로 하나의 엘리먼트가 추가필요
+- 하나 이상의 엘리먼트를 트랜지션하려면 보이지 않는 wrapper 역할의 `<template>` 이용
+
+```javascript
+<template v-if="ok">
+  <h1>Title</h1>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+</template>
+```
+
+### 3. 리스트 렌더링
+
+### v-for
+
+- v-for 디렉티브를 사용해 배열 기반으로 리스트 렌더링 가능
+
+- item in items 형태 문법 필요.
+  - items : 원본 데이터 배열
+  - item : 반복되는 배열 엘리먼트
+
+### 4. 이벤트 핸들링
+
+### **'v-on' Directive**
+
+#### Listening to Events
+
+- v-on 디렉티브를 사용해 이벤트 발생 시 JavaScript 실행되도록 함
+
+```javascript
+<div id="v_onExam">
+  <button v-on:click="cnt">Btn</button>
+  <p>버튼 클릭 횟수: {{ cnt }}번</p>
+</div>;
+
+var example1 = new Vue({
+  el: "#v_onExam",
+  data: {
+    cnt: 0
+  }
+});
+```
+
+#### 메소드 이벤트 핸들러
+
+- 로직이 항상 단순하지 않기 때문에 v-on은 호출하고자 하는 메소드를 받아 이벤트 발생시 수행할 수 있음
+
+```javascript
+<div id="v_onExam2">
+  <button v-on:click="calledMethod">HELLO</button>
+</div>;
+
+var example2 = new Vue({
+  el: "#v_onExam2",
+  data: {
+    name: "Vue.js"
+  },
+  // 메소드는 `methods` 객체 안에 정의
+  methods: {
+    calledMethod: function(event) {
+      // 메소드 안에서 사용하는 `this` = Vue 인스턴스
+      console.log("Method Event Handler " + this.name);
+    }
+  }
+});
+```
+
+#### 인라인 메소드 핸들러
+
+- 메소드 이름을 직접 바인딩 하지 않고 인라인으로 메소드 사용 가능
+
+```javascript
+<div id="v_onExam3">
+  <button v-on:click="callMethod('hello world')">HELLO WORLD</button>
+</div>;
+
+new Vue({
+  el: "#v_onExam3",
+  methods: {
+    callMethod: function(message) {
+      alert(message);
+    }
+  }
+});
+```
+
+#### 이벤트 수식어
+
+- Event Hanlder 내부에서 event.stopPropagation()와 같은 메소드를 호출할 수 있으나, DOM 이벤트 세부 사항 처리보다 데이터 로직에 대한 메소드만 사용하도록 이벤트 수식어를 제공함
+
+- 이벤트 수식어 키워드 일부
+  > .stop  
+  > .prevent  
+  > .once
+
+```html
+<!-- 클릭 이벤트 전파가 중단 -->
+<a v-on:click.stop="doEvent"></a>
+
+<!-- 제출 이벤트가 페이지를 다시 로드 하지 않음. form의 오작동 방지 -->
+<form v-on:submit.prevent="onSubmit"></form>
+
+<!-- 클릭 이벤트는 최대 한번만 트리거됨 .once 수식어는 컴포넌트 이벤트에서도 사용 가능-->
+<a v-on:click.once="doEvent"></a>
+```
+
+##
+
+남은 파트  
+14  
+AXIOS
+폼데이터 처리  
+15  
+npm부터 몇가지 가벼운 설명들  
+18  
+전체 설명 간단히
+이벤트 버스
+부모 자식 컴퍼넌트  
+19  
+vuex 상태관리
+vue router
+전체 정리
